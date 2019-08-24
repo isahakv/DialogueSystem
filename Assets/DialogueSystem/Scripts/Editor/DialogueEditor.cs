@@ -8,35 +8,6 @@ using DialogueSystem.Editor.Serialization;
 
 namespace DialogueSystem.Editor
 {
-	class PopupWindow : EditorWindow
-	{
-		string text;
-		MessageType type;
-
-		public void Init(string _text, MessageType _type)
-		{
-			text = _text;
-			type = _type;
-		}
-
-		public static void NewMessage(string text, MessageType type)
-		{
-			PopupWindow window = CreateInstance<PopupWindow>();
-			window.position = new Rect(Screen.width / 2, Screen.height / 2, 250, 150);
-			window.titleContent = new GUIContent(type.ToString());
-			window.Init(text, type);
-			window.Show();
-		}
-
-		void OnGUI()
-		{
-			EditorGUILayout.LabelField(text, EditorStyles.wordWrappedLabel);
-			GUILayout.Space(70);
-			if (GUILayout.Button("Ok"))
-				Close();
-		}
-	}
-
 	public class DialogueEditor : EditorWindow
 	{
 		List<DialogueData> dialogues = new List<DialogueData>();
@@ -47,7 +18,7 @@ namespace DialogueSystem.Editor
 		NodeConnectionPoint selectedConnectionPoint;
 
 		Vector2 mousePos;
-		Vector2 scrollPos;
+		Vector2 scrollPos, scrollSize;
 		float nodeWidth = 200f, nodeHeigth = 150f;
 
 		Rect menuSection;
@@ -87,7 +58,8 @@ namespace DialogueSystem.Editor
 			editDialogueSection.x = 0;
 			editDialogueSection.y = menuSection.height;
 			editDialogueSection.width = Screen.width;
-			editDialogueSection.height = Screen.height - menuSection.height;
+			editDialogueSection.height = Screen.height - menuSection.height - 20f;
+			scrollSize = new Vector2(editDialogueSection.width * 3.0f, editDialogueSection.height * 3.0f);
 		}
 
 		private void DrawMenu()
@@ -108,7 +80,7 @@ namespace DialogueSystem.Editor
 			{
 				// If name is empty.
 				if (string.IsNullOrEmpty(dialogues[currDialogueIdx].name))
-					PopupWindow.NewMessage("Enter Dialogue Name Before Saving It!", MessageType.Error);
+					EditorUtility.DisplayDialog("ERROR", "Enter Dialogue Name Before Saving It!", "OK");
 				else
 					SaveDialogues();
 			}
@@ -116,7 +88,7 @@ namespace DialogueSystem.Editor
 			{
 				// If name is empty.
 				if (string.IsNullOrEmpty(dialogues[currDialogueIdx].name))
-					PopupWindow.NewMessage("Enter Dialogue Name Before Saving It!", MessageType.Error);
+					EditorUtility.DisplayDialog("ERROR", "Enter Dialogue Name Before Saving It!", "OK");
 				else
 					SaveGameplayDialogues();
 			}
@@ -162,8 +134,8 @@ namespace DialogueSystem.Editor
 			if (dialogues.Count == 0)
 				return;
 
-			// scrollPos = GUI.BeginScrollView(editDialogueSection, scrollPos, new Rect(0, 0, 1000, 2000));
-
+			scrollPos = GUI.BeginScrollView(editDialogueSection, scrollPos, new Rect(0, 0, scrollSize.x, scrollSize.y));
+			
 			ProcessNodeEvents(Event.current);
 
 			DrawGrid(20, 0.2f, Color.gray);
@@ -174,7 +146,7 @@ namespace DialogueSystem.Editor
 
 			ProcessEvents(Event.current);
 
-			// GUI.EndScrollView();
+			GUI.EndScrollView();
 
 			// if (GUI.changed)
 			Repaint();
@@ -201,17 +173,17 @@ namespace DialogueSystem.Editor
 
 		private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
 		{
-			int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
-			int heightDivs = Mathf.CeilToInt(position.height / gridSpacing);
+			int widthDivs = Mathf.CeilToInt(scrollSize.x / gridSpacing);
+			int heightDivs = Mathf.CeilToInt(scrollSize.y / gridSpacing);
 
 			Handles.BeginGUI();
 			Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
 
 			for (int i = 0; i < widthDivs; i++)
-				Handles.DrawLine(new Vector3(i * gridSpacing, editDialogueSection.y, 0f), new Vector3(i * gridSpacing, position.height, 0f));
+				Handles.DrawLine(new Vector3(i * gridSpacing, 0f, 0f), new Vector3(i * gridSpacing, scrollSize.y, 0f));
 
 			for (int i = 0; i < heightDivs; i++)
-				Handles.DrawLine(new Vector3(editDialogueSection.x, i * gridSpacing, 0f), new Vector3(position.width, i * gridSpacing, 0f));
+				Handles.DrawLine(new Vector3(0, i * gridSpacing, 0f), new Vector3(scrollSize.x, i * gridSpacing, 0f));
 
 			Handles.EndGUI();
 		}
@@ -311,7 +283,7 @@ namespace DialogueSystem.Editor
 				// If they have same parent and different actor id-s, then avoid connection and show error.
 				if (c.outPoint.ownerNode == connection.outPoint.ownerNode && c.inPoint.ownerNode.actorID != connection.inPoint.ownerNode.actorID)
 				{
-					PopupWindow.NewMessage("Nodes of the same parent node must have same actor IDs!", MessageType.Error);
+					EditorUtility.DisplayDialog("ERROR", "Nodes of the same parent node must have same actor IDs!", "OK");
 					return;
 				}
 			}
@@ -415,12 +387,6 @@ namespace DialogueSystem.Editor
 
 		private void DeleteDialogue()
 		{
-			if (dialogues.Count == 0)
-			{
-				PopupWindow.NewMessage("There is no dialogue to delete.", MessageType.Error);
-				return;
-			}
-
 			dialogues.RemoveAt(currDialogueIdx);
 			dialogueNames = GetDialogueNames();
 		}
