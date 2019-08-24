@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using DialogueSystem.UI;
@@ -8,7 +8,7 @@ namespace DialogueSystem
 	public class DialogueManager : MonoBehaviour
 	{
 		public static DialogueManager Instance { get; private set; }
-		public DialogueUIHandler[] dialogueUIPrefabs;
+		public DialogueUIHandler[] dialogueUIHanlders;
 
 		List<Dialogue> pooledDialogues;
 
@@ -26,19 +26,19 @@ namespace DialogueSystem
 		private void Start()
 		{
 			DialogueActor[] actors = new DialogueActor[2];
-			actors[0] = new DialogueActor(0, "Artyom", false);
-			actors[1] = new DialogueActor(1, "Tony", true);
-			OpenDialogue(267, typeof(RPGDialogueUIHandler), false, actors);
+			actors[0] = new DialogueActor(0, "Artyom", false, null);
+			actors[1] = new DialogueActor(1, "Tony", true, null);
+			OpenDialogue(267, typeof(RPGDialogueUIHandler), false, null, actors);
 		}
 
-		public void OpenDialogue(int id, System.Type dialogueUIHandlerType, bool poolDialogue = false, params DialogueActor[] actors)
+		public void OpenDialogue(int id, Type dialogueUIHandlerType, bool poolDialogue, Action onDialogueClosed, params DialogueActor[] actors)
 		{
 			if (!(dialogueUIHandlerType.IsSubclassOf(typeof(DialogueUIHandler))))
 				return;
 
 			DialogueUIHandler dialogueUIHandler = null;
 			// Find the object of the right type in "dialogueUIPrefabs" array.
-			foreach (DialogueUIHandler dialogueUI in dialogueUIPrefabs)
+			foreach (DialogueUIHandler dialogueUI in dialogueUIHanlders)
 			{
 				if (dialogueUI.GetType() == dialogueUIHandlerType)
 					dialogueUIHandler = dialogueUI;
@@ -60,7 +60,7 @@ namespace DialogueSystem
 				AddPooledDialogue(dialogue);
 
 			// Open dialogue in DialogueUIHandler.
-			dialogueUIHandler.OpenDialogue(dialogue, actors);
+			dialogueUIHandler.OpenDialogue(dialogue, onDialogueClosed, actors);
 		}
 
 		public static string GetDialogueFilePath(int id)

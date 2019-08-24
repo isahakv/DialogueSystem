@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15c4f767ac45f0547b257a09ec755fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogueUIPrefabs:
+  dialogueUIHanlders:
   - {fileID: 861473519}
 --- !u!1 &124072316
 GameObject:
@@ -686,10 +686,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e0ae14fbb83c984b9ffe4aa7f47aa6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speakerIcon: {fileID: 1997419754}
-  speakerName: {fileID: 585155099}
   optionsParent: {fileID: 584392110}
   optionInstance: {fileID: 124072316}
+  speakerIcon: {fileID: 1997419754}
+  speakerName: {fileID: 585155099}
 --- !u!1 &570725110
 GameObject:
   m_ObjectHideFlags: 0
@@ -1413,9 +1413,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d625db8cfb1d4da47bfd96716b756518, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  msg: {fileID: 222541043}
   speakerIcon: {fileID: 1242104271}
   speakerName: {fileID: 1885531259}
-  msg: {fileID: 222541043}
 --- !u!1 &1506691782
 GameObject:
   m_ObjectHideFlags: 0
